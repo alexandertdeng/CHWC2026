@@ -107,7 +107,9 @@
       var badge = row.eliminated ? "OUT" : rank;
       var statusBadge = row.eliminated
         ? '<span class="status-badge ko-badge" aria-label="Knocked out">KO</span>'
-        : (row.perfect ? '<span class="status-badge perfect-badge" aria-label="Perfect score">Perfect!</span>' : '');
+        : row.perfect
+          ? '<span class="status-badge perfect-badge" aria-label="Perfect score">Perfect!</span>'
+          : '';
       var tr = document.createElement("tr");
       tr.className = "row" + (row.eliminated ? " eliminated" : (row.perfect ? " perfect perfect-row r" + rank : " r" + rank));
       if (row.perfect) {

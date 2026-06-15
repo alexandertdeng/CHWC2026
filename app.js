@@ -84,6 +84,7 @@
         shootout: shootout,
         matches: matches,
         eliminated: total >= 22,
+        perfect: total === 21,
       };
     });
 
@@ -104,7 +105,7 @@
     rows.forEach(function (row, i) {
       var rank = row.eliminated ? null : ++activeRank;
       var tr = document.createElement("tr");
-      tr.className = "row" + (row.eliminated ? " eliminated" : " r" + rank);
+      tr.className = "row" + (row.eliminated ? " eliminated" : (row.perfect ? " perfect r" + rank : " r" + rank));
 
       function countryFlag(name) {
         var map = (typeof TEAM_FLAGS !== "undefined") ? TEAM_FLAGS : {};
@@ -126,18 +127,18 @@
       var badge = row.eliminated ? "OUT" : rank;
       var eliminationLabel = row.eliminated
         ? '<div class="elimination-label">KO</div>'
-        : '';
+        : (row.perfect ? '<div class="elimination-label perfect-label">PERFECT</div>' : '');
 
       tr.innerHTML =
         '<td class="col-rank"><span class="rank-badge">' + badge + '</span></td>' +
         '<td><div class="player-text"><div class="nick">' + escapeHtml(row.nickname) +
-          (row.eliminated ? ' <span class="elim-tag">Eliminated</span>' : '') + '</div>' +
+          (row.eliminated ? ' <span class="elim-tag">Eliminated</span>' : (row.perfect ? ' <span class="elim-tag perfect-tag">Perfect</span>' : '')) + '</div>' +
           eliminationLabel + '</div></td>' +
         '<td><div class="teams">' + chips + '</div></td>' +
         '<td class="goals-cell"><span class="goals-num">' + row.total + '</span>' +
         '<span class="goals-sub">' + (row.eliminated
           ? "eliminated · 22+ goals"
-          : (row.shootout ? "incl. " + row.shootout + " shootout" : "across all teams")) + '</span></td>' +
+          : (row.perfect ? "perfect · exactly 21 goals" : (row.shootout ? "incl. " + row.shootout + " shootout" : "across all teams"))) + '</span></td>' +
         '<td class="played-cell"><span class="played-num">' + row.matches + '</span></td>';
       body.appendChild(tr);
     });

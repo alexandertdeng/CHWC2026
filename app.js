@@ -104,6 +104,10 @@
     var activeRank = 0;
     rows.forEach(function (row, i) {
       var rank = row.eliminated ? null : ++activeRank;
+      var badge = row.eliminated ? "OUT" : rank;
+      var statusBadge = row.eliminated
+        ? '<span class="status-badge ko-badge" aria-label="Knocked out">KO</span>'
+        : (row.perfect ? '<span class="status-badge perfect-badge" aria-label="Perfect score">Perfect!</span>' : '');
       var tr = document.createElement("tr");
       tr.className = "row" + (row.eliminated ? " eliminated" : (row.perfect ? " perfect perfect-row r" + rank : " r" + rank));
       if (row.perfect) {
@@ -127,15 +131,10 @@
                ' <span class="g">G:' + t.goals + '</span></span>';
       }).join("");
 
-      var badge = row.eliminated ? "OUT" : rank;
-      var eliminationLabel = row.eliminated
-        ? '<div class="elimination-label">KO</div>'
-        : (row.perfect ? '<div class="elimination-label perfect-label">Perfect!</div>' : '');
-
       tr.innerHTML =
         '<td class="col-rank"><span class="rank-badge">' + badge + '</span></td>' +
-        '<td><div class="player-text"><div class="nick">' + escapeHtml(row.nickname) + '</div>' +
-          eliminationLabel + '</div></td>' +
+        '<td><div class="player-text"><div class="nick-line"><span class="nick">' + escapeHtml(row.nickname) + '</span>' +
+          statusBadge + '</div></div></td>' +
         '<td><div class="teams">' + chips + '</div></td>' +
         '<td class="goals-cell"><span class="goals-num">' + row.total + '</span>' +
         '<span class="goals-sub">' + (row.eliminated

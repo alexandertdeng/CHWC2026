@@ -97,6 +97,38 @@ tr.r3 .rank-badge { background: var(--bronze); color: #2a1606; }
 
 .nick { font-weight: 600; font-size: 16px; }
 
+.nick-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.ko-badge {
+  background: var(--danger);
+  color: #fff;
+}
+
+.perfect-badge {
+  background: #fff;
+  color: #111827;
+  border: 1px solid #d1d5db;
+}
+
 /* Eliminated rows — once a nickname hits 22 goals. */
 tr.eliminated { background: rgba(248,113,113,0.12); }
 tr.eliminated:hover { background: rgba(248,113,113,0.18); }
@@ -266,6 +298,11 @@ tr.eliminated .rank-badge { background: var(--danger); color: #2a0606; }
   .nick {
     font-size: 15px;
     line-height: 1.2;
+  }
+
+  .status-badge {
+    font-size: 9px;
+    padding: 1px 6px;
   }
 
   .teams {

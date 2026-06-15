@@ -181,7 +181,127 @@ tr.eliminated .rank-badge { background: var(--danger); color: #2a0606; }
 }
 .foot button:hover { border-color: var(--accent); color: var(--accent); }
 
-@media (max-width: 560px) {
-  .col-teams { display: none; }
-  th.col-teams { display: none; }
+@media (max-width: 700px) {
+  body {
+    padding: 16px 10px 36px;
+  }
+
+  main {
+    max-width: 100%;
+  }
+
+  .board {
+    overflow: visible;
+  }
+
+  table,
+  thead,
+  tbody,
+  tr,
+  th,
+  td {
+    display: block;
+    width: 100%;
+  }
+
+  thead {
+    display: none;
+  }
+
+  tbody tr.row {
+    padding: 12px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  tbody td {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: none;
+    text-align: left;
+  }
+
+  tbody td::before {
+    flex: 0 0 92px;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  tbody td:nth-child(1)::before {
+    content: "Rank";
+  }
+
+  tbody td:nth-child(2)::before {
+    content: "Player";
+  }
+
+  tbody td:nth-child(3)::before {
+    content: "Teams";
+  }
+
+  tbody td:nth-child(4)::before {
+    content: "Goals";
+  }
+
+  tbody td:nth-child(5)::before {
+    content: "Played";
+  }
+
+  .col-rank,
+  .col-goals,
+  .goals-cell {
+    width: 100%;
+    text-align: left;
+  }
+
+  .rank-badge {
+    margin: 0;
+  }
+
+  .player-text,
+  .teams,
+  .goals-cell,
+  .played-cell {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .teams {
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .chip {
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .goals-sub {
+    text-align: left;
+  }
+}
+
+@media (max-width: 420px) {
+  tbody td {
+    display: block;
+  }
+
+  tbody td::before {
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .teams {
+    justify-content: flex-start;
+  }
 }

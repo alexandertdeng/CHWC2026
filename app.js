@@ -138,8 +138,8 @@
         '<td><div class="teams">' + chips + '</div></td>' +
         '<td class="goals-cell"><span class="goals-num">' + row.total + '</span>' +
         '<span class="goals-sub">' + (row.eliminated
-          ? "eliminated · 22+ goals"
-          : (row.perfect ? "perfect · exactly 21 goals" : (row.shootout ? "incl. " + row.shootout + " shootout" : "across all teams"))) + '</span></td>' +
+          ? "eliminated · >21 goals"
+          : (row.perfect ? "perfect · exactly 21 goals" : (row.shootout ? "incl. " + row.shootout + " shootout"))) + '</span></td>' +
         '<td class="played-cell"><span class="played-num">' + row.matches + '</span></td>';
       body.appendChild(tr);
     });

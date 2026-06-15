@@ -54,14 +54,6 @@ entries: [
     nickname: "Adam",
     teams: ["Argentina", "Curaçao", "Croatia", "Iran"]
   },
-    {
-    nickname: "Test Perfect",
-    teams: ["Germany", "Germany", "Germany"]
-  },
-    {
-    nickname: "Test KO",
-    teams: ["Germany", "Germany", "Germany", "Germany"]
-  },
 ],
 };
 

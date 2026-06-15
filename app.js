@@ -184,20 +184,22 @@
       : when.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
     titleEl.textContent = "Latest results — " + label;
 
-    list.innerHTML = dayMatches.map(function (m) {
-      var src = m.score.et || m.score.ft || m.score.ht;
-      var a = src[0] || 0, b = src[1] || 0;
-      var so = (m.score.p && (m.score.p[0] || m.score.p[1]))
-        ? ' <span class="so">(pens ' + (m.score.p[0] || 0) + '–' + (m.score.p[1] || 0) + ')</span>'
-        : "";
-      var aet = m.score.et ? ' <span class="so">(a.e.t.)</span>' : "";
-      return '<li class="score">' +
-        '<span class="team-a">' + escapeHtml(norm(m.team1)) + '</span>' +
-        '<span class="line">' + a + ' <span class="dash">–</span> ' + b + '</span>' +
-        '<span class="team-b">' + escapeHtml(norm(m.team2)) + '</span>' +
-        aet + so +
-        '</li>';
-    }).join("");
+    list.innerHTML = '<details class="spoiler"><summary>Reveal day\'s matches</summary><ul class="spoiler-list">' +
+      dayMatches.map(function (m) {
+        var src = m.score.et || m.score.ft || m.score.ht;
+        var a = src[0] || 0, b = src[1] || 0;
+        var so = (m.score.p && (m.score.p[0] || m.score.p[1]))
+          ? ' <span class="so">(pens ' + (m.score.p[0] || 0) + '–' + (m.score.p[1] || 0) + ')</span>'
+          : "";
+        var aet = m.score.et ? ' <span class="so">(a.e.t.)</span>' : "";
+        return '<li class="score">' +
+          '<span class="team-a">' + escapeHtml(norm(m.team1)) + '</span>' +
+          '<span class="line">' + a + ' <span class="dash">–</span> ' + b + '</span>' +
+          '<span class="team-b">' + escapeHtml(norm(m.team2)) + '</span>' +
+          aet + so +
+          '</li>';
+      }).join("") +
+      '</ul></details>';
 
     section.hidden = false;
   }

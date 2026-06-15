@@ -58,7 +58,10 @@ entries: [
     nickname: "Test",
     teams: ["Germany", "Germany", "Germany", "Germany"]
   },
-
+    {
+    nickname: "Test2",
+    teams: ["Japan", "Sweden", "Sweden", "Sweden"]
+  },
 ],
 };
 

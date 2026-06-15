@@ -124,14 +124,11 @@
       }).join("");
 
       var badge = row.eliminated ? "OUT" : rank;
-      var avatar = '<span class="avatar avatar-fallback">' +
-        escapeHtml((row.nickname || "?").charAt(0).toUpperCase()) +
-        '</span>';
 
       tr.innerHTML =
         '<td class="col-rank"><span class="rank-badge">' + badge + '</span></td>' +
-        '<td><div class="player">' + avatar + '<div class="player-text"><div class="nick">' + escapeHtml(row.nickname) +
-          (row.eliminated ? ' <span class="elim-tag">Eliminated</span>' : '') + '</div></div></div></td>' +
+        '<td><div class="player-text"><div class="nick">' + escapeHtml(row.nickname) +
+          (row.eliminated ? ' <span class="elim-tag">Eliminated</span>' : '') + '</div></div></td>' +
         '<td><div class="teams">' + chips + '</div></td>' +
         '<td class="goals-cell"><span class="goals-num">' + row.total + '</span>' +
         '<span class="goals-sub">' + (row.eliminated

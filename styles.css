@@ -90,28 +90,6 @@ tbody tr.row:hover { background: rgba(255,255,255,0.02); }
 tr.r1 .rank-badge { background: var(--gold); color: #2a210a; }
 tr.r2 .rank-badge { background: var(--silver); color: #1c2330; }
 tr.r3 .rank-badge { background: var(--bronze); color: #2a1606; }
-.player {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-}
-
-.avatar {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  flex: 0 0 38px;
-  background: var(--panel-2);
-  border: 1px solid var(--line);
-}
-.avatar {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  color: var(--muted);
-}
 
 .player-text {
   min-width: 0;

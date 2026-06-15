@@ -79,7 +79,6 @@
       var total = inPlay + shootout;
       return {
         nickname: entry.nickname,
-        imageUrl: entry.imageUrl || "",
         teams: teams,
         total: total,
         shootout: shootout,
@@ -125,9 +124,9 @@
       }).join("");
 
       var badge = row.eliminated ? "OUT" : rank;
-      var avatar = row.imageUrl
-        ? '<img class="avatar" src="' + escapeHtml(row.imageUrl) + '" alt="" loading="lazy">'
-        : '<span class="avatar avatar-fallback">' + escapeHtml(row.nickname.charAt(0) || "?") + '</span>';
+      var avatar = '<span class="avatar avatar-fallback">' +
+        escapeHtml((row.nickname || "?").charAt(0).toUpperCase()) +
+        '</span>';
 
       tr.innerHTML =
         '<td class="col-rank"><span class="rank-badge">' + badge + '</span></td>' +

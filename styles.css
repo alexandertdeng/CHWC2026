@@ -209,6 +209,14 @@ tr.eliminated .rank-badge { background: var(--danger); color: #2a0606; }
   }
 
   tbody tr.row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    grid-template-areas:
+      "player goals played"
+      "teams goals played";
+    align-items: center;
+    column-gap: 12px;
+    row-gap: 6px;
     padding: 12px;
     border-bottom: 1px solid var(--line);
   }
@@ -218,90 +226,114 @@ tr.eliminated .rank-badge { background: var(--danger); color: #2a0606; }
   }
 
   tbody td {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 8px 0;
+    padding: 0;
     border-bottom: none;
     text-align: left;
   }
 
   tbody td::before {
-    flex: 0 0 92px;
+    display: none;
+  }
+
+  tbody td:nth-child(1) {
+    display: none;
+  }
+
+  tbody td:nth-child(2) {
+    grid-area: player;
+    min-width: 0;
+  }
+
+  tbody td:nth-child(3) {
+    grid-area: teams;
+    min-width: 0;
+  }
+
+  tbody td:nth-child(4) {
+    grid-area: goals;
+    width: auto;
+    min-width: 42px;
+    text-align: right;
+  }
+
+  tbody td:nth-child(5) {
+    grid-area: played;
+    width: auto;
+    min-width: 34px;
+    text-align: right;
+  }
+
+  .nick {
+    font-size: 15px;
+    line-height: 1.2;
+  }
+
+  .teams {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    justify-content: flex-start;
+    min-width: 0;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 0;
+    gap: 0;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .chip .flag {
+    font-size: 15px;
+    line-height: 1;
+  }
+
+  .chip .stat,
+  .chip .g {
+    display: none;
+  }
+
+  .goals-num,
+  .played-num {
+    display: block;
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .goals-cell::before,
+  .played-cell::before {
+    display: block;
+    margin-bottom: 3px;
     color: var(--muted);
-    font-size: 11px;
+    font-size: 9px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
   }
 
-  tbody td:nth-child(1)::before {
-    content: "Rank";
-  }
-
-  tbody td:nth-child(2)::before {
-    content: "Player";
-  }
-
-  tbody td:nth-child(3)::before {
-    content: "Teams";
-  }
-
-  tbody td:nth-child(4)::before {
+  .goals-cell::before {
     content: "Goals";
   }
 
-  tbody td:nth-child(5)::before {
+  .played-cell::before {
     content: "Played";
   }
 
-  .col-rank,
-  .col-goals,
-  .goals-cell {
-    width: 100%;
-    text-align: left;
-  }
-
-  .rank-badge {
-    margin: 0;
-  }
-
-  .player-text,
-  .teams,
-  .goals-cell,
-  .played-cell {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .teams {
-    justify-content: flex-end;
-    flex-wrap: wrap;
-  }
-
-  .chip {
-    max-width: 100%;
-    white-space: normal;
-    overflow-wrap: anywhere;
-  }
-
   .goals-sub {
-    text-align: left;
-  }
-}
-
-@media (max-width: 420px) {
-  tbody td {
-    display: block;
+    display: none;
   }
 
-  tbody td::before {
-    display: block;
-    margin-bottom: 4px;
-  }
-
-  .teams {
-    justify-content: flex-start;
+  .elim-tag {
+    margin-left: 4px;
+    padding: 1px 5px;
+    font-size: 9px;
   }
 }

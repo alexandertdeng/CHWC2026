@@ -105,7 +105,10 @@
     rows.forEach(function (row, i) {
       var rank = row.eliminated ? null : ++activeRank;
       var tr = document.createElement("tr");
-      tr.className = "row" + (row.eliminated ? " eliminated" : (row.perfect ? " perfect r" + rank : " r" + rank));
+      tr.className = "row" + (row.eliminated ? " eliminated" : (row.perfect ? " perfect perfect-row r" + rank : " r" + rank));
+      if (row.perfect) {
+        tr.style.background = "rgba(255, 215, 0, 0.18)";
+      }
 
       function countryFlag(name) {
         var map = (typeof TEAM_FLAGS !== "undefined") ? TEAM_FLAGS : {};
@@ -132,7 +135,7 @@
       tr.innerHTML =
         '<td class="col-rank"><span class="rank-badge">' + badge + '</span></td>' +
         '<td><div class="player-text"><div class="nick">' + escapeHtml(row.nickname) +
-          (row.eliminated ? ' <span class="elim-tag">Eliminated</span>' : (row.perfect ? ' <span class="elim-tag perfect-tag">Perfect</span>' : '')) + '</div>' +
+          (row.eliminated ? ' <span class="elim-tag">KO</span>' : '') + '</div>' +
           eliminationLabel + '</div></td>' +
         '<td><div class="teams">' + chips + '</div></td>' +
         '<td class="goals-cell"><span class="goals-num">' + row.total + '</span>' +

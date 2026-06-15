@@ -1,0 +1,211 @@
+:root {
+  --bg: #0b1220;
+  --panel: #131c2e;
+  --panel-2: #1a2740;
+  --line: #243450;
+  --text: #eaf0fb;
+  --muted: #93a4c4;
+  --accent: #34d399;
+  --accent-2: #facc15;
+  --gold: #f5c518;
+  --silver: #c7d0dd;
+  --bronze: #d08a4e;
+  --danger: #f87171;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: radial-gradient(1200px 600px at 50% -10%, #1b2a4a 0%, var(--bg) 60%);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 24px 16px 48px;
+}
+
+main { max-width: 880px; margin: 0 auto; }
+
+.hero { text-align: center; margin-bottom: 22px; }
+.pitch-icon { font-size: 40px; }
+h1 { font-size: clamp(22px, 4vw, 32px); margin: 6px 0 4px; letter-spacing: -0.02em; }
+.subtitle { color: var(--muted); margin: 0 0 14px; font-size: 14px; }
+
+.status {
+  display: inline-block;
+  font-size: 13px;
+  color: var(--muted);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 5px 12px;
+  border-radius: 999px;
+}
+.status.live { color: var(--accent); border-color: rgba(52,211,153,0.4); }
+.status.error { color: var(--danger); border-color: rgba(248,113,113,0.4); }
+
+.warnings {
+  background: rgba(248,113,113,0.08);
+  border: 1px solid rgba(248,113,113,0.35);
+  color: #fecaca;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 18px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.warnings strong { color: #fff; }
+
+.board {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+}
+
+table { width: 100%; border-collapse: collapse; }
+thead th {
+  text-align: left;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  padding: 14px 16px;
+  background: var(--panel-2);
+  border-bottom: 1px solid var(--line);
+}
+.col-rank { width: 52px; text-align: center; }
+.col-goals { width: 90px; text-align: right; }
+
+tbody td { padding: 14px 16px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr.row:hover { background: rgba(255,255,255,0.02); }
+
+.rank-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border-radius: 50%;
+  font-weight: 700; font-size: 14px;
+  background: var(--panel-2); color: var(--muted); margin: 0 auto;
+}
+tr.r1 .rank-badge { background: var(--gold); color: #2a210a; }
+tr.r2 .rank-badge { background: var(--silver); color: #1c2330; }
+tr.r3 .rank-badge { background: var(--bronze); color: #2a1606; }
+.player {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex: 0 0 38px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+}
+
+.avatar-fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  color: var(--muted);
+}
+
+.player-text {
+  min-width: 0;
+}
+
+.nick { font-weight: 600; font-size: 16px; }
+
+/* Eliminated rows — once a nickname hits 22 goals. */
+tr.eliminated { background: rgba(248,113,113,0.12); }
+tr.eliminated:hover { background: rgba(248,113,113,0.18); }
+tr.eliminated td { color: var(--danger); }
+tr.eliminated .nick { color: var(--danger); }
+tr.eliminated .goals-num { color: var(--danger); }
+tr.eliminated .rank-badge { background: var(--danger); color: #2a0606; }
+.elim-tag {
+  display: inline-block;
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #fff; background: var(--danger);
+  border-radius: 999px; padding: 2px 8px; margin-left: 8px;
+  vertical-align: middle;
+}
+
+.teams { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; color: var(--text);
+  background: var(--panel-2); border: 1px solid var(--line);
+  border-radius: 999px; padding: 3px 9px; white-space: nowrap;
+}
+.chip .stat { color: var(--muted); font-weight: 600; }
+.chip .g { color: var(--accent); font-weight: 700; }
+.chip.out { opacity: 0.45; text-decoration: line-through; }
+.chip.bad { border-color: var(--danger); color: var(--danger); }
+
+.legend {
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+  margin: 14px 0 0;
+}
+.legend strong { color: var(--text); }
+
+.recent {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 16px 18px;
+  margin-top: 18px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+}
+.recent h2 {
+  font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--muted); margin: 0 0 12px;
+}
+.scores { list-style: none; margin: 0; padding: 0; }
+.score {
+  display: flex; align-items: baseline; gap: 8px;
+  padding: 8px 0; border-bottom: 1px solid var(--line);
+  font-size: 15px;
+}
+.scores li:last-child { border-bottom: none; }
+.score .team-a { flex: 1; text-align: right; }
+.score .team-b { flex: 1; text-align: left; }
+.score .line { font-weight: 800; white-space: nowrap; }
+.score .dash { color: var(--muted); font-weight: 400; }
+.score .so { color: var(--muted); font-size: 12px; }
+
+.goals-cell { text-align: right; }
+.goals-num { font-size: 22px; font-weight: 800; line-height: 1; }
+.goals-sub { display: block; font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+.empty { text-align: center; color: var(--muted); padding: 28px 16px; }
+
+.foot {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 12px; margin-top: 18px; color: var(--muted); font-size: 12px;
+}
+.foot-meta {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+  gap: 10px;
+}
+.foot a { color: var(--muted); }
+.foot .dot { opacity: 0.5; }
+.foot button {
+  background: var(--panel); color: var(--text);
+  border: 1px solid var(--line); border-radius: 8px;
+  padding: 5px 12px; font-size: 12px; cursor: pointer;
+}
+.foot button:hover { border-color: var(--accent); color: var(--accent); }
+
+@media (max-width: 560px) {
+  .col-teams { display: none; }
+  th.col-teams { display: none; }
+}

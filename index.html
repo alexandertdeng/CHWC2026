@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>World Cup 2026 — Goals Contest</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main>
+    <header class="hero">
+      <div class="pitch-icon" aria-hidden="true">⚽</div>
+      <h1 id="contest-title">World Cup 2026 — Goals Contest</h1>
+      <p class="subtitle">Total goals scored by each player's teams · penalty-shootout goals included</p>
+    </header>
+
+    <section id="warnings" class="warnings" hidden></section>
+
+    <section class="board">
+      <table id="ranking" aria-label="Ranking table">
+        <thead>
+          <tr>
+            <th class="col-rank">#</th>
+            <th class="col-nick">Player</th>
+            <th class="col-teams">Teams</th>
+            <th class="col-goals">Goals</th>
+            <th class="col-played">Games Played</th>
+          </tr>
+        </thead>
+        <tbody id="ranking-body">
+          <tr><td colspan="5" class="empty">Loading…</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <p class="legend"><strong>P</strong> = matches played · <strong>G</strong> = goals scored (incl. penalty-shootout goals)</p>
+
+    <section id="recent" class="recent" hidden>
+      <h2 id="recent-title">Latest results</h2>
+      <ul id="recent-list" class="scores"></ul>
+    </section>
+
+    <footer class="foot">
+      <div id="status" class="status">Loading live data…</div>
+      <div class="foot-meta">
+        <span id="updated">—</span>
+        <span class="dot">•</span>
+        <span>Data: <a href="https://github.com/openfootball/worldcup.json" target="_blank" rel="noopener">openfootball</a> (public domain)</span>
+        <span class="dot">•</span>
+        <button id="refresh" type="button">Refresh now</button>
+      </div>
+    </footer>
+  </main>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -53,7 +53,7 @@ entries: [
     {
     nickname: "Adam",
     teams: ["Argentina", "Curaçao", "Croatia", "Iran"]
-  },
+  }
 ],
 };
 

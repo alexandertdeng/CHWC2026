@@ -55,8 +55,12 @@ entries: [
     teams: ["Argentina", "Curaçao", "Croatia", "Iran"]
   },
     {
-    nickname: "Test",
+    nickname: "Test Perfect",
     teams: ["Germany", "Germany", "Germany"]
+  },
+    {
+    nickname: "Test KO",
+    teams: ["Germany", "Germany", "Germany", "Germany"]
   },
 ],
 };

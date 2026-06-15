@@ -130,12 +130,11 @@
       var badge = row.eliminated ? "OUT" : rank;
       var eliminationLabel = row.eliminated
         ? '<div class="elimination-label">KO</div>'
-        : (row.perfect ? '<div class="elimination-label perfect-label" style="background:#fff;color:#000;">PERFECT</div>' : '');
+        : (row.perfect ? '<div class="elimination-label perfect-label">Perfect!</div>' : '');
 
       tr.innerHTML =
         '<td class="col-rank"><span class="rank-badge">' + badge + '</span></td>' +
-        '<td><div class="player-text"><div class="nick">' + escapeHtml(row.nickname) +
-          (row.eliminated ? ' <span class="elim-tag">KO</span>' : '') + '</div>' +
+        '<td><div class="player-text"><div class="nick">' + escapeHtml(row.nickname) + '</div>' +
           eliminationLabel + '</div></td>' +
         '<td><div class="teams">' + chips + '</div></td>' +
         '<td class="goals-cell"><span class="goals-num">' + row.total + '</span>' +

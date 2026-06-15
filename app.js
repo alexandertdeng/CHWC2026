@@ -58,7 +58,7 @@
     return [
       "Eliminated",
       "Excommunicated",
-      "Toast"
+      "Toast",
       "Oops",
       "KO",
       "Icarus",

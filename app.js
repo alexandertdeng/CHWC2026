@@ -54,9 +54,89 @@
     return set;
   }
 
-  function render(tally) {
+  function eliminatedLabels() {
+    return [
+      "Eliminated",
+      "Excommunicated",
+      "Toast"
+      "Oops",
+      "KO",
+      "Icarus",
+      "WASTED",
+      "Overshot",
+      "Purged",
+      "Forsaken",
+    ];
+  }
+
+  function scoreForConfiguredTeams(match, teamSet) {
+    var total = 0;
+    if (!match.score) return total;
+    if (teamSet[norm(match.team1)]) {
+      var g1 = goalsForMatch(match, 0);
+      total += g1.inPlay + g1.shootout;
+    }
+    if (teamSet[norm(match.team2)]) {
+      var g2 = goalsForMatch(match, 1);
+      total += g2.inPlay + g2.shootout;
+    }
+    return total;
+  }
+
+  function eliminationInfo(matches) {
+    var played = (matches || []).filter(function (m) {
+      return m.score && m.date;
+    }).slice().sort(function (a, b) {
+      if (a.date !== b.date) return a.date.localeCompare(b.date);
+      return String(a.num || "").localeCompare(String(b.num || ""));
+    });
+
+    var eliminated = CONFIG.entries.map(function (entry) {
+      var teamSet = {};
+      (entry.teams || []).forEach(function (teamName) {
+        teamSet[norm(teamName)] = true;
+      });
+
+      var runningTotal = 0;
+      var eliminationDate = null;
+      var eliminationMatch = null;
+
+      played.some(function (match) {
+        runningTotal += scoreForConfiguredTeams(match, teamSet);
+        if (runningTotal >= 22) {
+          eliminationDate = match.date;
+          eliminationMatch = match.num || match.date;
+          return true;
+        }
+        return false;
+      });
+
+      return eliminationDate ? {
+        nickname: entry.nickname,
+        date: eliminationDate,
+        match: eliminationMatch
+      } : null;
+    }).filter(Boolean).sort(function (a, b) {
+      if (a.date !== b.date) return a.date.localeCompare(b.date);
+      return String(a.match).localeCompare(String(b.match)) || a.nickname.localeCompare(b.nickname);
+    });
+
+    var labels = eliminatedLabels();
+    var info = {};
+    eliminated.forEach(function (item, idx) {
+      info[item.nickname] = {
+        date: item.date,
+        order: idx + 1,
+        label: labels[idx] || ("Elimination #" + (idx + 1) + " — the spreadsheet has spoken")
+      };
+    });
+    return info;
+  }
+
+  function render(tally, matches) {
     var validSet = validTeamSet();
     var unknown = [];
+    var eliminatedByNickname = eliminationInfo(matches || []);
 
     var rows = CONFIG.entries.map(function (entry) {
       var inPlay = 0, shootout = 0, matches = 0;
@@ -84,6 +164,7 @@
         shootout: shootout,
         matches: matches,
         eliminated: total >= 22,
+        elimination: eliminatedByNickname[entry.nickname] || null,
       };
     });
 
@@ -124,11 +205,15 @@
       }).join("");
 
       var badge = row.eliminated ? "OUT" : rank;
+      var eliminationLabel = row.elimination
+        ? '<div class="elimination-label">' + escapeHtml(row.elimination.label) + '</div>'
+        : '';
 
       tr.innerHTML =
         '<td class="col-rank"><span class="rank-badge">' + badge + '</span></td>' +
         '<td><div class="player-text"><div class="nick">' + escapeHtml(row.nickname) +
-          (row.eliminated ? ' <span class="elim-tag">Eliminated</span>' : '') + '</div></div></td>' +
+          (row.eliminated ? ' <span class="elim-tag">Eliminated</span>' : '') + '</div>' +
+          eliminationLabel + '</div></td>' +
         '<td><div class="teams">' + chips + '</div></td>' +
         '<td class="goals-cell"><span class="goals-num">' + row.total + '</span>' +
         '<span class="goals-sub">' + (row.eliminated
@@ -211,7 +296,7 @@
       .then(function (data) {
         var matches = (data && data.matches) || [];
         var played = matches.filter(function (m) { return m.score; }).length;
-        render(tallyTeams(matches));
+        render(tallyTeams(matches), matches);
         renderRecent(matches);
         var when = new Date();
         $("#updated").textContent = "Updated " + when.toLocaleString();
@@ -234,7 +319,7 @@
   // Render configured participants immediately, before the live data request finishes.
   // This prevents any placeholder rows hardcoded in index.html from remaining visible
   // if the football data feed is slow, unavailable, or blocked.
-  render({});
+  render({}, []);
 
   load();
   if (CONFIG.refreshMinutes > 0) {

@@ -18,7 +18,11 @@
      - inPlay: score after extra time if present, otherwise full time (this
        already includes any penalties taken during play).
      - shootout: tie-breaker penalty shootout goals (score.p), counted only if
-       enabled in config. */
+       enabled in config.
+
+     Own goals are not inferable from score.ft/score.et alone. They require
+     scorer text from the feed, where openfootball records them with an `og`
+     marker, such as `Marcelo 11' og`. */
   function goalsForMatch(match, side /* 0 = team1, 1 = team2 */) {
     var s = match.score;
     if (!s) return { inPlay: 0, shootout: 0, played: false };
@@ -26,6 +30,168 @@
     var inPlay = inPlaySrc ? (inPlaySrc[side] || 0) : 0;
     var shootout = (CONFIG.includeShootoutGoals && s.p) ? (s.p[side] || 0) : 0;
     return { inPlay: inPlay, shootout: shootout, played: true };
+  }
+
+  function scorerTextForMatch(match) {
+    var parts = [];
+
+    ["goals1", "goals2", "goals", "scorers", "scorer", "events", "notes", "note", "summary", "text", "raw", "line"].forEach(function (key) {
+      if (match && match[key] !== undefined && match[key] !== null) {
+        parts.push(match[key]);
+      }
+    });
+
+    function flatten(value) {
+      if (value === undefined || value === null) return "";
+      if (Array.isArray(value)) return value.map(flatten).join(" ");
+      if (typeof value === "object") {
+        return Object.keys(value).map(function (key) { return flatten(value[key]); }).join(" ");
+      }
+      return String(value);
+    }
+
+    return parts.map(flatten).join(" ");
+  }
+
+  function countOwnGoalsInText(text) {
+    var s = String(text || "");
+
+    // Openfootball marks own goals in the goal/scorer entry, not in
+    // score.ft / score.et. In the 2026 JSON feed the structured form is
+    // usually `{ "owngoal": true }` inside goals1/goals2. Older text forms
+    // include `61'og` and `11' (o.g.)`; tolerate common variants too.
+    var matches = s.match(/\b\d+(?:\+\d+)?'\s*(?:\(?\s*o\.?g\.?\s*\)?|own\s+goal)\b/gi);
+    return matches ? matches.length : 0;
+  }
+
+
+  function ownGoalCountForMatch(match) {
+    if (!match) return 0;
+
+    // Prefer structured goal/scorer fields when the JSON feed exposes them,
+    // then fall back to flattened scorer text. This keeps the tracker robust
+    // across openfootball JSON exports.
+    var structuredCount = 0;
+    ["goals1", "goals2", "goals", "scorers", "scorer", "events"].forEach(function (key) {
+      var value = match[key];
+      if (!Array.isArray(value)) return;
+
+      value.forEach(function (item) {
+        if (!item) return;
+        if (typeof item === "string") {
+          structuredCount += countOwnGoalsInText(item);
+          return;
+        }
+        if (typeof item !== "object") return;
+
+        var typeText = String(item.type || item.kind || item.event || item.note || item.notes || "").toLowerCase();
+        var ownGoalFlag = item.own_goal === true || item.owngoal === true || item.og === true;
+        if (ownGoalFlag || /\bown\s+goal\b|\bo\.?g\.?\b/.test(typeText)) {
+          structuredCount += 1;
+          return;
+        }
+
+        structuredCount += countOwnGoalsInText(Object.keys(item).map(function (prop) {
+          return item[prop];
+        }).join(" "));
+      });
+    });
+
+    if (structuredCount) return structuredCount;
+
+    return countOwnGoalsInText(scorerTextForMatch(match));
+  }
+
+  function ownGoalScoringTeamsForMatch(match) {
+    if (!match) return [];
+
+    var teams = [];
+
+    function itemOwnGoalCount(item) {
+      if (!item) return 0;
+      if (typeof item === "string") return countOwnGoalsInText(item);
+      if (typeof item !== "object") return 0;
+
+      var typeText = String(item.type || item.kind || item.event || item.note || item.notes || "").toLowerCase();
+      var ownGoalFlag = item.own_goal === true || item.owngoal === true || item.og === true;
+      if (ownGoalFlag || /\bown\s+goal\b|\bo\.?g\.?\b/.test(typeText)) return 1;
+
+      return countOwnGoalsInText(Object.keys(item).map(function (prop) {
+        return item[prop];
+      }).join(" "));
+    }
+
+    function collectFromSide(goalListKey, ownGoalScoringTeam) {
+      var value = match[goalListKey];
+      if (!Array.isArray(value)) return;
+
+      value.forEach(function (item) {
+        var count = itemOwnGoalCount(item);
+        for (var i = 0; i < count; i += 1) {
+          teams.push(norm(ownGoalScoringTeam));
+        }
+      });
+    }
+
+    collectFromSide("goals1", match.team2);
+    collectFromSide("goals2", match.team1);
+
+    return teams;
+  }
+
+  function matchDateTimeValue(match) {
+    if (!match) return 0;
+
+    var dateText = match.date || "";
+    var timeText = match.time || match.kickoff || match.datetime || match.timestamp || "";
+
+    if (dateText && timeText) {
+      var combined = String(dateText) + "T" + String(timeText).replace(/Z$/, "");
+      var combinedTime = Date.parse(combined);
+      if (!isNaN(combinedTime)) return combinedTime;
+    }
+
+    if (dateText) {
+      var dateTime = Date.parse(String(dateText));
+      if (!isNaN(dateTime)) return dateTime;
+    }
+
+    if (timeText) {
+      var timeOnly = Date.parse(String(timeText));
+      if (!isNaN(timeOnly)) return timeOnly;
+    }
+
+    return 0;
+  }
+
+  function ownGoalScoringTeams(matches) {
+    return matches.slice().sort(function (a, b) {
+      return matchDateTimeValue(a) - matchDateTimeValue(b);
+    }).reduce(function (teams, match) {
+      return teams.concat(ownGoalScoringTeamsForMatch(match));
+    }, []);
+  }
+
+  function countOwnGoals(matches) {
+    return matches.reduce(function (sum, match) {
+      return sum + ownGoalCountForMatch(match);
+    }, 0);
+  }
+
+  function renderOwnGoalsTotal(total) {
+    var el = $("#own-goals-total");
+    if (!el) {
+      var anchor = $("#updated") || $("#status") || $("#contest-title");
+      el = document.createElement("div");
+      el.id = "own-goals-total";
+      el.className = "own-goals-total";
+      if (anchor && anchor.parentNode) {
+        anchor.parentNode.insertBefore(el, anchor.nextSibling);
+      } else {
+        document.body.insertBefore(el, document.body.firstChild);
+      }
+    }
+    el.textContent = "Own goals: " + total;
   }
 
   /* Build a per-team tally from all matches. */
@@ -55,11 +221,35 @@
   }
 
   function render(tally, matches) {
+    var allMatches = Array.isArray(matches) ? matches : [];
     var validSet = validTeamSet();
     var unknown = [];
+    var ownGoals = countOwnGoals(allMatches);
+    var ownGoalTeams = ownGoalScoringTeams(allMatches);
+    renderOwnGoalsTotal(ownGoals);
 
     var rows = CONFIG.entries.map(function (entry) {
-      var inPlay = 0, shootout = 0, matches = 0;
+      if (entry.type === "own_goals") {
+        return {
+          nickname: entry.nickname,
+          type: "own_goals",
+          teams: ownGoalTeams.map(function (teamName) {
+            return {
+              name: teamName,
+              goals: 1,
+              shootout: 0,
+              matches: 0,
+              known: validSet[teamName] === true,
+            };
+          }),
+          total: ownGoals,
+          shootout: 0,
+          matches: "",
+          eliminated: ownGoals >= 22,
+          perfect: ownGoals === 21,
+        };
+      }
+      var inPlay = 0, shootout = 0, teamMatches = 0;
       var teams = (entry.teams || []).map(function (teamName) {
         var t = norm(teamName);
         var rec = tally[t] || { inPlay: 0, shootout: 0, matches: 0 };
@@ -67,7 +257,7 @@
         if (!known && Object.keys(validSet).length) unknown.push(t);
         inPlay += rec.inPlay;
         shootout += rec.shootout;
-        matches += rec.matches;
+        teamMatches += rec.matches;
         return {
           name: t,
           goals: rec.inPlay + rec.shootout,
@@ -82,7 +272,7 @@
         teams: teams,
         total: total,
         shootout: shootout,
-        matches: matches,
+        matches: teamMatches,
         eliminated: total >= 22,
         perfect: total === 21,
       };
@@ -104,6 +294,7 @@
     var activeRank = 0;
     rows.forEach(function (row, i) {
       var rank = row.eliminated ? null : ++activeRank;
+      var isOwnGoalsEntry = row.type === "own_goals";
       var badge = row.eliminated ? "OUT" : rank;
       var statusBadge = row.eliminated
         ? '<span class="status-badge ko-badge" aria-label="Knocked out">KO</span>'
@@ -120,18 +311,30 @@
         var map = (typeof TEAM_FLAGS !== "undefined") ? TEAM_FLAGS : {};
         return map[name] || "";
       }
-      var chips = row.teams.map(function (t) {
-        var cls = "chip" + (t.known ? "" : " bad");
-        var title = t.known
-          ? (t.matches + " match" + (t.matches === 1 ? "" : "es") + " played"
-             + (t.shootout ? " · incl. " + t.shootout + " shootout" : ""))
-          : "Unknown team name — check spelling against config.js";
-        return '<span class="' + cls + '" title="' + title + '">' +
-               (countryFlag(t.name) ? '<span class="flag">' + countryFlag(t.name) + '</span> ' : '') +
-               escapeHtml(t.name) +
-               ' <span class="stat">P:' + t.matches + '</span>' +
-               ' <span class="g">G:' + t.goals + '</span></span>';
-      }).join("");
+      var chips = isOwnGoalsEntry
+        ? row.teams.map(function (t) {
+            var flag = countryFlag(t.name);
+            var cls = "chip own-goal-chip" + (t.known ? "" : " bad");
+            var title = t.known
+              ? t.name + " own goal"
+              : "Own-goal team not recognised — check spelling against config.js";
+            return '<span class="' + cls + '" title="' + escapeHtml(title) + '">' +
+                   (flag ? '<span class="flag">' + flag + '</span> ' : '') +
+                   escapeHtml(t.name) +
+                   '</span>';
+          }).join("")
+        : row.teams.map(function (t) {
+            var cls = "chip" + (t.known ? "" : " bad");
+            var title = t.known
+              ? (t.matches + " match" + (t.matches === 1 ? "" : "es") + " played"
+                 + (t.shootout ? " · incl. " + t.shootout + " shootout" : ""))
+              : "Unknown team name — check spelling against config.js";
+            return '<span class="' + cls + '" title="' + escapeHtml(title) + '">' +
+                   (countryFlag(t.name) ? '<span class="flag">' + countryFlag(t.name) + '</span> ' : '') +
+                   escapeHtml(t.name) +
+                   ' <span class="stat">P:' + t.matches + '</span>' +
+                   ' <span class="g">G:' + t.goals + '</span></span>';
+          }).join("");
 
       tr.innerHTML =
         '<td class="col-rank"><span class="rank-badge">' + badge + '</span></td>' +
@@ -142,7 +345,7 @@
         '<span class="goals-sub">' + (row.eliminated
           ? "eliminated · >21 goals"
           : (row.perfect ? "perfect · exactly 21 goals" : (row.shootout ? "incl. " + row.shootout + " shootout" : ""))) + '</span></td>' +
-        '<td class="played-cell"><span class="played-num">' + row.matches + '</span></td>';
+        '<td class="played-cell"><span class="played-num">' + (isOwnGoalsEntry ? "" : row.matches) + '</span></td>';
       body.appendChild(tr);
     });
 

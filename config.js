@@ -53,6 +53,11 @@ entries: [
     {
     nickname: "Adam",
     teams: ["Argentina", "Curaçao", "Croatia", "Iran"]
+  },
+  {
+    nickname: "Own Goal",
+    type: "own_goals",
+    teams: []
   }
 ],
 };

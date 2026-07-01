@@ -223,6 +223,90 @@
     }, []);
   }
 
+  function eliminatedTeamSet(matches) {
+    var set = {};
+    var groupTeams = {};
+    var roundOf32Teams = {};
+    var completedGroupMatches = 0;
+    var requiredCompletedGroupMatches = 72; // 12 groups × 6 matches in the 48-team format.
+    var knockoutStagePattern = /round\s*of\s*32|round\s*of\s*16|knockout|quarter|semi|final|third|3rd|playoff|play-off/i;
+    var roundOf32Pattern = /round\s*of\s*32/i;
+
+    function matchScore(match) {
+      if (!match || !match.score) return null;
+      return match.score.et || match.score.ft || match.score.ht || null;
+    }
+
+    function stageTextFor(match) {
+      return [
+        match.stage,
+        match.round,
+        match.group,
+        match.name,
+        match.title,
+        match.matchday
+      ].map(function (value) { return value || ""; }).join(" ");
+    }
+
+    function isConcreteTeam(team) {
+      var t = norm(team);
+      return t && !/^(tbd|winner|loser)\b/i.test(t);
+    }
+
+    function addTeam(setObj, team) {
+      if (!isConcreteTeam(team)) return;
+      setObj[norm(team)] = true;
+    }
+
+    (Array.isArray(matches) ? matches : []).forEach(function (match) {
+      if (!match || !match.team1 || !match.team2) return;
+
+      var stageText = stageTextFor(match);
+      var score = matchScore(match);
+      var isKnockout = knockoutStagePattern.test(stageText);
+      var isRoundOf32 = roundOf32Pattern.test(stageText);
+
+      if (!isKnockout) {
+        addTeam(groupTeams, match.team1);
+        addTeam(groupTeams, match.team2);
+        if (score) completedGroupMatches += 1;
+        return;
+      }
+
+      if (isRoundOf32) {
+        addTeam(roundOf32Teams, match.team1);
+        addTeam(roundOf32Teams, match.team2);
+      }
+
+      if (!score) return;
+
+      var a = score[0] || 0;
+      var b = score[1] || 0;
+
+      if (a === b && match.score && match.score.p) {
+        a = match.score.p[0] || 0;
+        b = match.score.p[1] || 0;
+      }
+
+      if (a === b) return;
+      set[norm(a < b ? match.team1 : match.team2)] = true;
+    });
+
+    // Source-backed group-stage elimination: only apply this after the group
+    // stage has fully completed and the openfootball feed has populated all
+    // Round of 32 teams. This prevents countries being incorrectly marked out
+    // at the start of the tournament, when the Round of 32 fixtures are still
+    // empty/TBD, while correctly handling the 2026 format where the top two
+    // from each group plus the eight best third-place teams advance.
+    if (completedGroupMatches >= requiredCompletedGroupMatches && Object.keys(roundOf32Teams).length >= 32) {
+      Object.keys(groupTeams).forEach(function (team) {
+        if (!roundOf32Teams[team]) set[team] = true;
+      });
+    }
+
+    return set;
+  }
+
   function countOwnGoals(matches) {
     return matches.reduce(function (sum, match) {
       return sum + ownGoalCountForMatch(match);
@@ -278,6 +362,7 @@
     var ownGoals = countOwnGoals(allMatches);
     var ownGoalTeams = ownGoalScoringTeams(allMatches);
     var teamGoalEvents = getTeamGoalEvents(allMatches);
+    var eliminatedTeams = eliminatedTeamSet(allMatches);
     renderOwnGoalsTotal(ownGoals);
 
     var rows = CONFIG.entries.map(function (entry) {
@@ -390,15 +475,22 @@
         var map = (typeof TEAM_FLAGS !== "undefined") ? TEAM_FLAGS : {};
         return map[name] || "";
       }
+      function flagHtml(name) {
+        var flag = countryFlag(name);
+        return flag ? '<span class="flag">' + flag + '</span> ' : "";
+      }
+      function teamNameHtml(name) {
+        var text = escapeHtml(name);
+        return eliminatedTeams[norm(name)] ? '<span style="text-decoration:line-through; text-decoration-thickness:2px;">' + text + '</span>' : text;
+      }
       var chips = isOwnGoalsEntry
         ? row.teams.map(function (t) {
-            var flag = countryFlag(t.name);
             var cls = "chip own-goal-chip" + (t.known ? "" : " bad");
             var title = t.known
               ? t.name + " own goal"
               : "Own-goal team not recognised — check spelling against config.js";
             return '<span class="' + cls + '" title="' + escapeHtml(title) + '">' +
-                   (flag ? '<span class="flag">' + flag + '</span> ' : '') +
+                   flagHtml(t.name) +
                    escapeHtml(t.name) +
                    '</span>';
           }).join("")
@@ -409,8 +501,8 @@
                  + (t.shootout ? " · incl. " + t.shootout + " shootout" : ""))
               : "Unknown team name — check spelling against config.js";
             return '<span class="' + cls + '" title="' + escapeHtml(title) + '">' +
-                   (countryFlag(t.name) ? '<span class="flag">' + countryFlag(t.name) + '</span> ' : '') +
-                   escapeHtml(t.name) +
+                   flagHtml(t.name) +
+                   teamNameHtml(t.name) +
                    ' <span class="stat">P:' + t.matches + '</span>' +
                    ' <span class="g">G:' + t.goals + '</span></span>';
           }).join("");
